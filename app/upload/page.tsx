@@ -1,96 +1,65 @@
-import Link from "next/link"
-
 import { T } from "@/lib/design/tokens"
+import { createClient } from "@/lib/supabase/server"
 
+import { AppShell } from "@/components/layout/app-shell"
 import { UploadRow } from "@/components/transactions/upload-row"
 import { Button } from "@/components/ui/button"
 import { Chip } from "@/components/ui/chip"
 import { Eyebrow } from "@/components/ui/eyebrow"
-import { IconDoc, IconSparkle, IconUpload, IconX } from "@/components/ui/icons"
+import { IconDoc, IconSparkle, IconUpload } from "@/components/ui/icons"
 import { Rule } from "@/components/ui/rule"
 
-export default function UploadPage() {
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "flex-start",
-        minHeight: "100vh",
-        background: T.ivory,
-        padding: "48px 16px",
-        fontFamily: T.sans,
-      }}
-    >
-      <div style={{ width: "100%", maxWidth: 520 }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 20,
-          }}
-        >
-          <Link
-            href="/"
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 999,
-              border: `1px solid ${T.rule}`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: T.ink,
-              textDecoration: "none",
-              background: T.paper,
-            }}
-          >
-            <IconX size={11} />
-          </Link>
-          <Chip tone="ink" size="sm">
-            <span style={{ display: "inline-flex", marginRight: 4 }}>
-              <IconSparkle size={10} />
-            </span>
-            AI
-          </Chip>
-        </div>
+export default async function UploadPage() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-        <div style={{ marginBottom: 24 }}>
-          <div
-            style={{
-              fontSize: 11,
-              letterSpacing: 1.4,
-              textTransform: "uppercase",
-              color: T.muted,
-              marginBottom: 6,
-              fontWeight: 500,
-            }}
-          >
-            Upload
-          </div>
+  return (
+    <AppShell
+      userEmail={user?.email}
+      userName={user?.user_metadata?.display_name}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 24,
+        }}
+      >
+        <div>
+          <Eyebrow>Upload</Eyebrow>
           <div
             style={{
               fontFamily: T.serif,
-              fontSize: 32,
-              letterSpacing: -0.5,
-              lineHeight: 1.15,
+              fontSize: 36,
+              fontWeight: 400,
+              letterSpacing: -0.8,
+              marginTop: 4,
             }}
           >
-            Drop a file.
-            <br />
+            Drop a file.{" "}
             <span style={{ fontStyle: "italic", color: T.muted }}>
               We&rsquo;ll do the filing.
             </span>
           </div>
         </div>
+        <Chip tone="ink" size="md">
+          <span style={{ display: "inline-flex", marginRight: 4 }}>
+            <IconSparkle size={12} />
+          </span>
+          AI powered
+        </Chip>
+      </div>
 
+      <div style={{ flex: 1, overflow: "auto", paddingBottom: 28 }}>
         <div
           style={{
             padding: "36px 28px",
             background: T.paper,
             border: `1.5px dashed ${T.faint}`,
-            borderRadius: 2,
+            borderRadius: 16,
             textAlign: "center",
             marginBottom: 24,
           }}
@@ -145,7 +114,8 @@ export default function UploadPage() {
           style={{
             background: T.paper,
             border: `1px solid ${T.rule}`,
-            borderRadius: 2,
+            borderRadius: 16,
+            padding: "0 20px",
             overflow: "hidden",
             marginBottom: 24,
           }}
@@ -176,6 +146,6 @@ export default function UploadPage() {
           ))}
         </div>
       </div>
-    </div>
+    </AppShell>
   )
 }
