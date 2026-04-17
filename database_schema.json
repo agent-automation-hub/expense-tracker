@@ -1,0 +1,78 @@
+{
+  "profiles": {
+    "id": "uuid (PK, references auth.users)",
+    "display_name": "text",
+    "default_currency": "char(3)",
+    "created_at": "timestamptz",
+    "updated_at": "timestamptz"
+  },
+
+  "categories": {
+    "id": "uuid (PK)",
+    "user_id": "uuid (FK → profiles)",
+    "name": "text",
+    "scope": "enum: expense | income | both",
+    "color": "char(7)",
+    "icon": "text",
+    "is_archived": "boolean",
+    "created_at": "timestamptz",
+    "updated_at": "timestamptz"
+  },
+
+  "transactions": {
+    "id": "uuid (PK)",
+    "user_id": "uuid (FK → profiles)",
+    "category_id": "uuid (FK → categories, nullable)",
+    "type": "enum: expense | income",
+    "status": "enum: confirmed | draft | deleted",
+    "amount": "numeric(18,4)",
+    "currency": "char(3)",
+    "date": "date",
+    "merchant": "text (nullable)",
+    "note": "text (nullable)",
+    "ai_extraction_id": "uuid (FK → ai_extracted_transactions, nullable)",
+    "created_at": "timestamptz",
+    "updated_at": "timestamptz"
+  },
+
+  "uploaded_files": {
+    "id": "uuid (PK)",
+    "user_id": "uuid (FK → profiles)",
+    "original_filename": "text",
+    "mime_type": "text",
+    "storage_path": "text",
+    "file_size_bytes": "bigint (nullable)",
+    "upload_status": "enum: pending | uploaded | processing | done | failed",
+    "created_at": "timestamptz",
+    "updated_at": "timestamptz"
+  },
+
+  "ai_extractions": {
+    "id": "uuid (PK)",
+    "user_id": "uuid (FK → profiles)",
+    "uploaded_file_id": "uuid (FK → uploaded_files)",
+    "status": "enum: pending | completed | failed",
+    "raw_result": "jsonb (nullable)",
+    "error_message": "text (nullable)",
+    "created_at": "timestamptz",
+    "updated_at": "timestamptz"
+  },
+
+  "ai_extracted_transactions": {
+    "id": "uuid (PK)",
+    "ai_extraction_id": "uuid (FK → ai_extractions)",
+    "user_id": "uuid (FK → profiles)",
+    "proposed_type": "enum: expense | income (nullable)",
+    "proposed_amount": "numeric(18,4) (nullable)",
+    "proposed_currency": "char(3) (nullable)",
+    "proposed_date": "date (nullable)",
+    "proposed_merchant": "text (nullable)",
+    "proposed_note": "text (nullable)",
+    "proposed_category_id": "uuid (FK → categories, nullable)",
+    "confidence": "numeric(4,3)",
+    "review_status": "enum: pending | approved | rejected",
+    "confirmed_transaction_id": "uuid (FK → transactions, nullable)",
+    "created_at": "timestamptz",
+    "updated_at": "timestamptz"
+  }
+}
