@@ -1,22 +1,24 @@
 "use client"
 
-import Link from "next/link"
-import { useSearchParams } from "next/navigation"
 import { Suspense } from "react"
 
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
+
 import { T } from "@/lib/design/tokens"
-import { Eyebrow } from "@/components/ui/eyebrow"
-import { DisplayNumber } from "@/components/ui/display-number"
-import { Chip } from "@/components/ui/chip"
+
 import { Button } from "@/components/ui/button"
+import { Chip } from "@/components/ui/chip"
+import { DisplayNumber } from "@/components/ui/display-number"
+import { Eyebrow } from "@/components/ui/eyebrow"
 import { Field } from "@/components/ui/field"
-import { Rule } from "@/components/ui/rule"
 import {
-  IconX,
+  IconArrowRight,
   IconMinus,
   IconPlus,
-  IconArrowRight,
+  IconX,
 } from "@/components/ui/icons"
+import { Rule } from "@/components/ui/rule"
 
 function AddTransactionContent() {
   const params = useSearchParams()

@@ -1,13 +1,14 @@
 import Link from "next/link"
 
 import { T } from "@/lib/design/tokens"
+import { totals, tx } from "@/lib/mock/data"
 import { fmtCOPraw } from "@/lib/utils/format"
-import { tx, totals } from "@/lib/mock/data"
-import { Eyebrow } from "@/components/ui/eyebrow"
-import { Chip } from "@/components/ui/chip"
+
 import { Button } from "@/components/ui/button"
+import { Chip } from "@/components/ui/chip"
+import { Eyebrow } from "@/components/ui/eyebrow"
+import { IconDownload, IconX } from "@/components/ui/icons"
 import { MonoNumber } from "@/components/ui/mono-number"
-import { IconX, IconDownload } from "@/components/ui/icons"
 
 const formats = [
   { fmt: "PDF", sub: "Statement", active: true },
@@ -38,11 +39,7 @@ function SummaryCell({
       >
         {label}
       </div>
-      <MonoNumber
-        size={13}
-        color={color || T.ink}
-        style={{ fontWeight: 500 }}
-      >
+      <MonoNumber size={13} color={color || T.ink} style={{ fontWeight: 500 }}>
         {val}
       </MonoNumber>
     </div>
@@ -171,19 +168,15 @@ export default function ExportPage() {
             marginBottom: 20,
           }}
         >
-          {["This month", "Last month", "This year", "Custom"].map(
-            (l, i) => (
-              <Chip key={l} tone={i === 0 ? "ink" : "ghost"} size="md">
-                {l}
-              </Chip>
-            ),
-          )}
+          {["This month", "Last month", "This year", "Custom"].map((l, i) => (
+            <Chip key={l} tone={i === 0 ? "ink" : "ghost"} size="md">
+              {l}
+            </Chip>
+          ))}
         </div>
 
         <Eyebrow style={{ marginBottom: 8 }}>Include</Eyebrow>
-        <div
-          style={{ display: "flex", gap: 6, marginBottom: 20 }}
-        >
+        <div style={{ display: "flex", gap: 6, marginBottom: 20 }}>
           <Chip tone="ink" size="md">
             All transactions
           </Chip>

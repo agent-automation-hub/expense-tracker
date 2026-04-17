@@ -26,7 +26,7 @@ export function TxRow({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "28px 1fr auto auto 130px 16px",
+          gridTemplateColumns: "28px 1fr 140px 120px 130px 16px",
           alignItems: "center",
           gap: 14,
           padding: "13px 0",
@@ -59,7 +59,7 @@ export function TxRow({
             {transaction.note}
           </div>
         </div>
-        <Chip tone="ghost" size="sm">
+        <Chip tone="ghost" size="sm" style={{ justifySelf: "start" }}>
           {cat.label}
         </Chip>
         <MonoNumber size={11} color={T.muted}>

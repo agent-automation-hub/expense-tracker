@@ -1,17 +1,13 @@
 import Link from "next/link"
 
 import { T } from "@/lib/design/tokens"
-import { Eyebrow } from "@/components/ui/eyebrow"
-import { Chip } from "@/components/ui/chip"
-import { Button } from "@/components/ui/button"
-import { Rule } from "@/components/ui/rule"
+
 import { UploadRow } from "@/components/transactions/upload-row"
-import {
-  IconX,
-  IconSparkle,
-  IconUpload,
-  IconDoc,
-} from "@/components/ui/icons"
+import { Button } from "@/components/ui/button"
+import { Chip } from "@/components/ui/chip"
+import { Eyebrow } from "@/components/ui/eyebrow"
+import { IconDoc, IconSparkle, IconUpload, IconX } from "@/components/ui/icons"
+import { Rule } from "@/components/ui/rule"
 
 export default function UploadPage() {
   return (
@@ -53,9 +49,7 @@ export default function UploadPage() {
             <IconX size={11} />
           </Link>
           <Chip tone="ink" size="sm">
-            <span
-              style={{ display: "inline-flex", marginRight: 4 }}
-            >
+            <span style={{ display: "inline-flex", marginRight: 4 }}>
               <IconSparkle size={10} />
             </span>
             AI
@@ -126,11 +120,9 @@ export default function UploadPage() {
           >
             Drag a file, or click to pick
           </div>
-          <div
-            style={{ fontSize: 12, color: T.muted, marginBottom: 16 }}
-          >
-            PDF &middot; JPG &middot; PNG &middot; HEIC &middot; CSV
-            &middot; up to 20 MB
+          <div style={{ fontSize: 12, color: T.muted, marginBottom: 16 }}>
+            PDF &middot; JPG &middot; PNG &middot; HEIC &middot; CSV &middot; up
+            to 20 MB
           </div>
           <div
             style={{
@@ -139,11 +131,7 @@ export default function UploadPage() {
               justifyContent: "center",
             }}
           >
-            <Button
-              variant="primary"
-              size="sm"
-              icon={<IconDoc size={12} />}
-            >
+            <Button variant="primary" size="sm" icon={<IconDoc size={12} />}>
               Choose file
             </Button>
             <Button variant="light" size="sm">
@@ -162,11 +150,7 @@ export default function UploadPage() {
             marginBottom: 24,
           }}
         >
-          <UploadRow
-            name="receipt-azahar.jpg"
-            state="scanning"
-            progress={62}
-          />
+          <UploadRow name="receipt-azahar.jpg" state="scanning" progress={62} />
           <Rule color={T.rule2} />
           <UploadRow
             name="bancolombia-march.pdf"

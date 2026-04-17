@@ -1,13 +1,14 @@
 import { T, catColors } from "@/lib/design/tokens"
-import { fmtCOPraw } from "@/lib/utils/format"
 import { categories, tx } from "@/lib/mock/data"
 import { createClient } from "@/lib/supabase/server"
+import { fmtCOPraw } from "@/lib/utils/format"
+
 import { AppShell } from "@/components/layout/app-shell"
+import { Button } from "@/components/ui/button"
 import { Eyebrow } from "@/components/ui/eyebrow"
+import { IconArrowRight, IconPlus } from "@/components/ui/icons"
 import { MonoNumber } from "@/components/ui/mono-number"
 import { Rule } from "@/components/ui/rule"
-import { IconArrowRight, IconPlus } from "@/components/ui/icons"
-import { Button } from "@/components/ui/button"
 
 const expenses = categories.filter((c) => c.kind === "expense")
 const earnings = categories.filter((c) => c.kind === "earning")

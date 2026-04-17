@@ -1,10 +1,11 @@
 import { T } from "@/lib/design/tokens"
 import { createClient } from "@/lib/supabase/server"
-import { AppShell } from "@/components/layout/app-shell"
-import { TopBar } from "@/components/layout/top-bar"
+
+import { CategoryBreakdown } from "@/components/dashboard/category-breakdown"
 import { HeroStats } from "@/components/dashboard/hero-stats"
 import { RecentActivity } from "@/components/dashboard/recent-activity"
-import { CategoryBreakdown } from "@/components/dashboard/category-breakdown"
+import { AppShell } from "@/components/layout/app-shell"
+import { TopBar } from "@/components/layout/top-bar"
 
 export default async function DashboardPage() {
   const supabase = await createClient()

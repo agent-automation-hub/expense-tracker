@@ -2,12 +2,13 @@ import Link from "next/link"
 
 import { T } from "@/lib/design/tokens"
 import { fmtCOPraw } from "@/lib/utils/format"
-import { Eyebrow } from "@/components/ui/eyebrow"
-import { Chip } from "@/components/ui/chip"
-import { Button } from "@/components/ui/button"
-import { Rule } from "@/components/ui/rule"
+
 import { ReviewRow } from "@/components/transactions/review-row"
+import { Button } from "@/components/ui/button"
+import { Chip } from "@/components/ui/chip"
+import { Eyebrow } from "@/components/ui/eyebrow"
 import { IconChevronLeft, IconSparkle } from "@/components/ui/icons"
+import { Rule } from "@/components/ui/rule"
 
 const rows = [
   {
