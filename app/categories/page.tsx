@@ -1,6 +1,7 @@
 import { T, catColors } from "@/lib/design/tokens"
 import { fmtCOPraw } from "@/lib/utils/format"
 import { categories, tx } from "@/lib/mock/data"
+import { createClient } from "@/lib/supabase/server"
 import { AppShell } from "@/components/layout/app-shell"
 import { Eyebrow } from "@/components/ui/eyebrow"
 import { MonoNumber } from "@/components/ui/mono-number"
@@ -46,9 +47,14 @@ function CategoryRow({ cat }: { cat: (typeof categories)[number] }) {
   )
 }
 
-export default function CategoriesPage() {
+export default async function CategoriesPage() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
   return (
-    <AppShell>
+    <AppShell userEmail={user?.email} userName={user?.user_metadata?.display_name}>
       <div
         style={{
           display: "flex",
