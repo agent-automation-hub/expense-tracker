@@ -2,7 +2,7 @@ import { T } from "@/lib/design/tokens"
 
 const variantMap = {
   primary: { bg: T.ink, fg: "#FBF9F5", br: T.ink },
-  ghost: { bg: "transparent", fg: T.ink, br: T.rule },
+  ghost: { bg: T.paper, fg: T.ink, br: T.rule },
   coral: { bg: T.coral, fg: "#fff", br: T.coral },
   teal: { bg: T.teal, fg: "#fff", br: T.teal },
   light: { bg: "#FBF9F5", fg: T.ink, br: T.rule },
@@ -49,6 +49,7 @@ export function Button({
         gap: 8,
         cursor: "pointer",
         letterSpacing: 0,
+        userSelect: "none",
         ...style,
       }}
     >
