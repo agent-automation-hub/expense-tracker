@@ -1,5 +1,6 @@
 import { T } from "@/lib/design/tokens"
 import { tx, catMap } from "@/lib/mock/data"
+import { createClient } from "@/lib/supabase/server"
 import { AppShell } from "@/components/layout/app-shell"
 import { Eyebrow } from "@/components/ui/eyebrow"
 import { Chip } from "@/components/ui/chip"
@@ -19,9 +20,14 @@ const groups = [
   { label: "Earlier", items: tx.slice(7) },
 ]
 
-export default function ActivityPage() {
+export default async function ActivityPage() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
   return (
-    <AppShell>
+    <AppShell userEmail={user?.email} userName={user?.user_metadata?.display_name}>
       <div
         style={{
           display: "flex",

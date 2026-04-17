@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Eyebrow } from "@/components/ui/eyebrow"
 import { IconFilter, IconPlus, IconSearch } from "@/components/ui/icons"
 
-export function TopBar() {
+export function TopBar({ userName }: { userName?: string | null }) {
+  const firstName = userName?.split(" ")[0] || "there"
   return (
     <div
       style={{
@@ -29,7 +30,7 @@ export function TopBar() {
             marginTop: 4,
           }}
         >
-          Good afternoon, Valentina.
+          Good afternoon, {firstName}.
         </div>
       </div>
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>

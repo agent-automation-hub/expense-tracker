@@ -1,14 +1,20 @@
 import { T } from "@/lib/design/tokens"
+import { createClient } from "@/lib/supabase/server"
 import { AppShell } from "@/components/layout/app-shell"
 import { TopBar } from "@/components/layout/top-bar"
 import { HeroStats } from "@/components/dashboard/hero-stats"
 import { RecentActivity } from "@/components/dashboard/recent-activity"
 import { CategoryBreakdown } from "@/components/dashboard/category-breakdown"
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
   return (
-    <AppShell>
-      <TopBar />
+    <AppShell userEmail={user?.email} userName={user?.user_metadata?.display_name}>
+      <TopBar userName={user?.user_metadata?.display_name} />
       <HeroStats />
       <section
         style={{

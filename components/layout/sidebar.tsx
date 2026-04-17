@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { T } from "@/lib/design/tokens"
+import { logout } from "@/app/auth/actions"
 
 import { Button } from "@/components/ui/button"
 import { Chip } from "@/components/ui/chip"
@@ -19,8 +20,16 @@ const navItems = [
   { label: "Export", href: "/export", badge: null },
 ]
 
-export function Sidebar() {
+export function Sidebar({
+  userEmail,
+  userName,
+}: {
+  userEmail?: string | null
+  userName?: string | null
+}) {
   const pathname = usePathname()
+  const displayName = userName || (userEmail ? userEmail.split("@")[0] : "Guest")
+  const initial = displayName[0].toLowerCase()
 
   return (
     <aside
@@ -138,36 +147,72 @@ export function Sidebar() {
 
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
           paddingTop: 10,
           borderTop: `1px solid ${T.rule}`,
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
         }}
       >
         <div
           style={{
-            width: 32,
-            height: 32,
-            borderRadius: 999,
-            background: T.ink,
-            color: T.paper,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            fontFamily: T.serif,
-            fontSize: 15,
-            fontStyle: "italic",
+            gap: 10,
           }}
         >
-          v
-        </div>
-        <div style={{ lineHeight: 1.2 }}>
-          <div style={{ fontSize: 13, fontWeight: 500 }}>Valentina R.</div>
-          <div style={{ fontSize: 11, color: T.muted }}>
-            Personal &middot; COP
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 999,
+              background: T.ink,
+              color: T.paper,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontFamily: T.serif,
+              fontSize: 15,
+              fontStyle: "italic",
+              flexShrink: 0,
+            }}
+          >
+            {initial}
+          </div>
+          <div style={{ lineHeight: 1.2, minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {displayName}
+            </div>
+            <div style={{ fontSize: 11, color: T.muted }}>
+              Personal &middot; COP
+            </div>
           </div>
         </div>
+        <button
+          onClick={() => logout()}
+          style={{
+            width: "100%",
+            height: 30,
+            borderRadius: 999,
+            border: `1px solid ${T.rule}`,
+            background: "transparent",
+            color: T.muted,
+            fontFamily: T.sans,
+            fontSize: 12,
+            fontWeight: 500,
+            cursor: "pointer",
+          }}
+        >
+          Sign out
+        </button>
       </div>
     </aside>
   )

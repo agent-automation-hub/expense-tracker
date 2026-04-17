@@ -4,7 +4,15 @@ import { T } from "@/lib/design/tokens"
 
 import { Sidebar } from "@/components/layout/sidebar"
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({
+  children,
+  userEmail,
+  userName,
+}: {
+  children: React.ReactNode
+  userEmail?: string | null
+  userName?: string | null
+}) {
   return (
     <div
       style={{
@@ -16,7 +24,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         overflow: "hidden",
       }}
     >
-      <Sidebar />
+      <Sidebar userEmail={userEmail} userName={userName} />
       <main
         style={{
           flex: 1,
