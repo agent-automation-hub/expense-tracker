@@ -4,13 +4,14 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { T } from "@/lib/design/tokens"
-import { logout } from "@/app/auth/actions"
 
 import { Button } from "@/components/ui/button"
 import { Chip } from "@/components/ui/chip"
 import { Eyebrow } from "@/components/ui/eyebrow"
 import { IconMinus, IconPlus, IconUpload } from "@/components/ui/icons"
 import { Rule } from "@/components/ui/rule"
+
+import { logout } from "@/app/auth/actions"
 
 const navItems = [
   { label: "Overview", href: "/", badge: null },
@@ -28,7 +29,8 @@ export function Sidebar({
   userName?: string | null
 }) {
   const pathname = usePathname()
-  const displayName = userName || (userEmail ? userEmail.split("@")[0] : "Guest")
+  const displayName =
+    userName || (userEmail ? userEmail.split("@")[0] : "Guest")
   const initial = displayName[0].toLowerCase()
 
   return (

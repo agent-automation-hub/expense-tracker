@@ -111,12 +111,8 @@
           "name": "ai_extracted_transactions_ai_extraction_id_ai_extractions_id_fk",
           "tableFrom": "ai_extracted_transactions",
           "tableTo": "ai_extractions",
-          "columnsFrom": [
-            "ai_extraction_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ai_extraction_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -124,12 +120,8 @@
           "name": "ai_extracted_transactions_user_id_profiles_id_fk",
           "tableFrom": "ai_extracted_transactions",
           "tableTo": "profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -137,12 +129,8 @@
           "name": "ai_extracted_transactions_proposed_category_id_categories_id_fk",
           "tableFrom": "ai_extracted_transactions",
           "tableTo": "categories",
-          "columnsFrom": [
-            "proposed_category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["proposed_category_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -150,12 +138,8 @@
           "name": "ai_extracted_transactions_confirmed_transaction_id_transactions_id_fk",
           "tableFrom": "ai_extracted_transactions",
           "tableTo": "transactions",
-          "columnsFrom": [
-            "confirmed_transaction_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["confirmed_transaction_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -230,12 +214,8 @@
           "name": "ai_extractions_user_id_profiles_id_fk",
           "tableFrom": "ai_extractions",
           "tableTo": "profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -243,12 +223,8 @@
           "name": "ai_extractions_uploaded_file_id_uploaded_files_id_fk",
           "tableFrom": "ai_extractions",
           "tableTo": "uploaded_files",
-          "columnsFrom": [
-            "uploaded_file_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["uploaded_file_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -329,12 +305,8 @@
           "name": "categories_user_id_profiles_id_fk",
           "tableFrom": "categories",
           "tableTo": "profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -485,12 +457,8 @@
           "name": "transactions_user_id_profiles_id_fk",
           "tableFrom": "transactions",
           "tableTo": "profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -498,12 +466,8 @@
           "name": "transactions_category_id_categories_id_fk",
           "tableFrom": "transactions",
           "tableTo": "categories",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -584,12 +548,8 @@
           "name": "uploaded_files_user_id_profiles_id_fk",
           "tableFrom": "uploaded_files",
           "tableTo": "profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -605,57 +565,32 @@
     "public.category_scope": {
       "name": "category_scope",
       "schema": "public",
-      "values": [
-        "expense",
-        "income",
-        "both"
-      ]
+      "values": ["expense", "income", "both"]
     },
     "public.extraction_status": {
       "name": "extraction_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "completed",
-        "failed"
-      ]
+      "values": ["pending", "completed", "failed"]
     },
     "public.review_status": {
       "name": "review_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "approved",
-        "rejected"
-      ]
+      "values": ["pending", "approved", "rejected"]
     },
     "public.transaction_status": {
       "name": "transaction_status",
       "schema": "public",
-      "values": [
-        "confirmed",
-        "draft",
-        "deleted"
-      ]
+      "values": ["confirmed", "draft", "deleted"]
     },
     "public.transaction_type": {
       "name": "transaction_type",
       "schema": "public",
-      "values": [
-        "expense",
-        "income"
-      ]
+      "values": ["expense", "income"]
     },
     "public.upload_status": {
       "name": "upload_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "uploaded",
-        "processing",
-        "done",
-        "failed"
-      ]
+      "values": ["pending", "uploaded", "processing", "done", "failed"]
     }
   },
   "schemas": {},

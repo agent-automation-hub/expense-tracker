@@ -1,6 +1,6 @@
 # Ledger — Personal Expense Tracker
 
-A personal finance app for tracking expenses and earnings in Colombian Pesos (COP). Built with an editorial-minimal fintech aesthetic — the interface bets on *glanceability*: know in two seconds whether this month is red or green.
+A personal finance app for tracking expenses and earnings in Colombian Pesos (COP). Built with an editorial-minimal fintech aesthetic — the interface bets on _glanceability_: know in two seconds whether this month is red or green.
 
 ## Tech Stack
 
@@ -74,14 +74,14 @@ base/                       # Original design mockup (JSX reference, not used at
 
 6 tables in `lib/db/schema.ts`:
 
-| Table                      | Purpose                                  |
-|----------------------------|------------------------------------------|
-| `profiles`                 | User profiles (linked to Supabase Auth)  |
-| `categories`               | Expense/income categories per user       |
-| `transactions`             | All financial transactions               |
-| `uploaded_files`           | Files uploaded for AI extraction         |
-| `ai_extractions`           | AI extraction jobs per uploaded file     |
-| `ai_extracted_transactions`| Individual entries extracted by AI        |
+| Table                       | Purpose                                 |
+| --------------------------- | --------------------------------------- |
+| `profiles`                  | User profiles (linked to Supabase Auth) |
+| `categories`                | Expense/income categories per user      |
+| `transactions`              | All financial transactions              |
+| `uploaded_files`            | Files uploaded for AI extraction        |
+| `ai_extractions`            | AI extraction jobs per uploaded file    |
+| `ai_extracted_transactions` | Individual entries extracted by AI      |
 
 6 enums: `category_scope`, `transaction_type`, `transaction_status`, `upload_status`, `extraction_status`, `review_status`.
 
