@@ -14,7 +14,10 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser()
 
   return (
-    <AppShell userEmail={user?.email} userName={user?.user_metadata?.display_name}>
+    <AppShell
+      userEmail={user?.email}
+      userName={user?.user_metadata?.display_name}
+    >
       <TopBar userName={user?.user_metadata?.display_name} />
       <HeroStats />
       <section

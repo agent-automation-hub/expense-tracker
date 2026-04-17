@@ -1,7 +1,7 @@
-import { createServerClient } from "@supabase/ssr"
 import { NextResponse } from "next/server"
-
 import { NextRequest } from "next/server"
+
+import { createServerClient } from "@supabase/ssr"
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -42,7 +42,11 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  if (user && isAuthRoute && !request.nextUrl.pathname.startsWith("/auth/callback")) {
+  if (
+    user &&
+    isAuthRoute &&
+    !request.nextUrl.pathname.startsWith("/auth/callback")
+  ) {
     const url = request.nextUrl.clone()
     url.pathname = "/"
     return NextResponse.redirect(url)
