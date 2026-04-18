@@ -1,4 +1,7 @@
+import type { Metadata, Viewport } from "next"
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google"
+
+import { ServiceWorkerRegistrar } from "@/components/pwa/service-worker-registrar"
 
 import "./globals.css"
 
@@ -20,9 +23,28 @@ const jetbrains = JetBrains_Mono({
   display: "swap",
 })
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Ledger — Personal expense tracker",
   description: "Know in two seconds whether this month is red or green.",
+  applicationName: "Ledger",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Ledger",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F4F1EC" },
+    { media: "(prefers-color-scheme: dark)", color: "#141311" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 }
 
 export default function RootLayout({
@@ -35,7 +57,10 @@ export default function RootLayout({
       lang="en"
       className={`${fraunces.variable} ${inter.variable} ${jetbrains.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        <ServiceWorkerRegistrar />
+      </body>
     </html>
   )
 }

@@ -39,5 +39,38 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-.claude
-.agents
+
+# editor / IDE (personal dev settings, not runtime)
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# agent / AI tooling (not runtime)
+.claude/
+.agents/
+.cursor/
+CLAUDE.md
+AGENTS.md
+.cursorrules
+skills-lock.json
+tasks/
+
+# design mockup reference (JSX playground, not used at runtime)
+base/
+
+# project docs (not required to run the app)
+context.md
+database_schema.json
+
+# logs
+*.log
+logs/
