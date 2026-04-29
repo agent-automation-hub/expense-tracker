@@ -2,16 +2,19 @@
 
 import { useEffect, useRef, useState } from "react"
 
-import { T, catColors } from "@/lib/design/tokens"
-import { categories, tx } from "@/lib/mock/data"
-import { fmtCOPraw } from "@/lib/utils/format"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import type { inferRouterOutputs } from "@trpc/server"
+
+import { T } from "@/lib/design/tokens"
 
 import { Button } from "@/components/ui/button"
 import { Chip } from "@/components/ui/chip"
 import { Eyebrow } from "@/components/ui/eyebrow"
 import { IconArrowRight, IconPlus, IconX } from "@/components/ui/icons"
-import { MonoNumber } from "@/components/ui/mono-number"
 import { Rule } from "@/components/ui/rule"
+
+import { trpc } from "@/trpc/client"
+import type { AppRouter } from "@/trpc/routers/_app"
 
 const PALETTE = [
   "#D66A4E",
@@ -28,13 +31,9 @@ const PALETTE = [
   "#C2785C",
 ]
 
-const expenses = categories.filter((c) => c.kind === "expense")
-const earnings = categories.filter((c) => c.kind === "earning")
+type Category = inferRouterOutputs<AppRouter>["categories"]["list"][number]
 
-function CategoryRow({ cat }: { cat: (typeof categories)[number] }) {
-  const total = tx
-    .filter((t) => t.cat === cat.id)
-    .reduce((s, t) => s + t.amount, 0)
+function CategoryRow({ cat }: { cat: Category }) {
   return (
     <div
       style={{
@@ -49,16 +48,13 @@ function CategoryRow({ cat }: { cat: (typeof categories)[number] }) {
           width: 28,
           height: 28,
           borderRadius: 999,
-          background: catColors[cat.id] || T.faint,
+          background: cat.color ?? T.faint,
           flexShrink: 0,
         }}
       />
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 13.5, fontWeight: 500 }}>{cat.label}</div>
+        <div style={{ fontSize: 13.5, fontWeight: 500 }}>{cat.name}</div>
       </div>
-      <MonoNumber size={12} color={T.muted}>
-        {fmtCOPraw(total)}
-      </MonoNumber>
       <span style={{ color: T.muted }}>
         <IconArrowRight size={12} />
       </span>
@@ -68,6 +64,14 @@ function CategoryRow({ cat }: { cat: (typeof categories)[number] }) {
 
 export function CategoriesView() {
   const [open, setOpen] = useState(false)
+  const categoriesQuery = useQuery(trpc.categories.list.queryOptions())
+  const categories = categoriesQuery.data ?? []
+  const expenses = categories.filter(
+    (category) => category.scope === "expense" || category.scope === "both",
+  )
+  const earnings = categories.filter(
+    (category) => category.scope === "income" || category.scope === "both",
+  )
 
   return (
     <>
@@ -116,12 +120,14 @@ export function CategoriesView() {
             marginBottom: 24,
           }}
         >
-          {expenses.map((c, i) => (
-            <div key={c.id}>
-              <CategoryRow cat={c} />
-              {i < expenses.length - 1 && <Rule color={T.rule2} />}
-            </div>
-          ))}
+          <CategoryList
+            categories={expenses}
+            emptyLabel={
+              categoriesQuery.isPending
+                ? "Loading categories."
+                : "No expense categories yet."
+            }
+          />
         </div>
 
         <Eyebrow style={{ marginBottom: 10 }}>
@@ -135,12 +141,14 @@ export function CategoriesView() {
             padding: "0 20px",
           }}
         >
-          {earnings.map((c, i) => (
-            <div key={c.id}>
-              <CategoryRow cat={c} />
-              {i < earnings.length - 1 && <Rule color={T.rule2} />}
-            </div>
-          ))}
+          <CategoryList
+            categories={earnings}
+            emptyLabel={
+              categoriesQuery.isPending
+                ? "Loading categories."
+                : "No earning categories yet."
+            }
+          />
         </div>
       </div>
 
@@ -149,12 +157,50 @@ export function CategoriesView() {
   )
 }
 
+function CategoryList({
+  categories,
+  emptyLabel,
+}: {
+  categories: Category[]
+  emptyLabel: string
+}) {
+  if (!categories.length) {
+    return (
+      <div
+        style={{
+          color: T.muted,
+          fontSize: 13,
+          padding: "18px 14px",
+        }}
+      >
+        {emptyLabel}
+      </div>
+    )
+  }
+
+  return categories.map((category, index) => (
+    <div key={category.id}>
+      <CategoryRow cat={category} />
+      {index < categories.length - 1 && <Rule color={T.rule2} />}
+    </div>
+  ))
+}
+
 function NewCategoryPopup({ onClose }: { onClose: () => void }) {
   const [name, setName] = useState("")
   const [scope, setScope] = useState<"expense" | "income">("expense")
   const [color, setColor] = useState(PALETTE[0])
   const backdropRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const queryClient = useQueryClient()
+  const createCategory = useMutation(
+    trpc.categories.create.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries(trpc.categories.list.queryFilter())
+        onClose()
+      },
+    }),
+  )
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -173,9 +219,14 @@ function NewCategoryPopup({ onClose }: { onClose: () => void }) {
   }
 
   function handleSave() {
-    if (!name.trim()) return
-    // TODO: save to database
-    onClose()
+    const trimmedName = name.trim()
+    if (!trimmedName || createCategory.isPending) return
+
+    createCategory.mutate({
+      color,
+      name: trimmedName,
+      scope,
+    })
   }
 
   return (
@@ -384,11 +435,25 @@ function NewCategoryPopup({ onClose }: { onClose: () => void }) {
             variant="primary"
             size="sm"
             onClick={handleSave}
-            style={{ opacity: name.trim() ? 1 : 0.5 }}
+            style={{
+              opacity: name.trim() && !createCategory.isPending ? 1 : 0.5,
+            }}
           >
-            Create
+            {createCategory.isPending ? "Creating" : "Create"}
           </Button>
         </div>
+        {createCategory.error && (
+          <div
+            style={{
+              color: T.coral,
+              fontSize: 12,
+              lineHeight: 1.4,
+              marginTop: 12,
+            }}
+          >
+            {createCategory.error.message}
+          </div>
+        )}
       </div>
     </div>
   )

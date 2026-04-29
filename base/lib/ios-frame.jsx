@@ -5,6 +5,8 @@
 // ─────────────────────────────────────────────────────────────
 // Status bar
 // ─────────────────────────────────────────────────────────────
+const { React } = window
+
 function IOSStatusBar({ dark = false, time = "9:41" }) {
   const c = dark ? "#fff" : "#000"
   return (

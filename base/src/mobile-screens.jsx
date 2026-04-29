@@ -1,5 +1,6 @@
 // Mobile screens — iOS frames, 402 × 874
 
+const { React } = window
 const { T, fmtCOP, fmtCOPraw, D } = window
 
 // ─────────────────────────────────────────────────────────────
@@ -750,7 +751,7 @@ function MobUpload() {
             Drop a file.
             <br />
             <span style={{ fontStyle: "italic", color: T.muted }}>
-              We'll do the filing.
+              We&apos;ll do the filing.
             </span>
           </span>
         }

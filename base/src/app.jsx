@@ -167,9 +167,9 @@ function App() {
             <span style={{ fontStyle: "italic" }}>glanceability</span>. Ledger
             bets the whole interface on one claim: you should know, in under two
             seconds, whether this month is red or green. Every screen protects
-            that promise. The AI intake doesn't try to be smart — it tries to be{" "}
-            <span style={{ fontStyle: "italic" }}>honest</span>: show what you
-            extracted, show how sure you are, let the human confirm.
+            that promise. The AI intake doesn&apos;t try to be smart — it tries
+            to be <span style={{ fontStyle: "italic" }}>honest</span>: show what
+            you extracted, show how sure you are, let the human confirm.
           </div>
         </div>
       </DesignCanvas>
