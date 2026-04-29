@@ -565,33 +565,33 @@ function IOSKeyboard({ dark = false }) {
           position: "relative",
         }}
       >
-        {['"The"', "the", "to"].map((w, i) => (
-          <React.Fragment key={i}>
-            {i > 0 && (
-              <div
-                style={{
-                  width: 1,
-                  height: 25,
-                  background: "#ccc",
-                  opacity: 0.3,
-                }}
-              />
-            )}
+        {['"The"', "the", "to"].map((w, i) => [
+          i > 0 ? (
             <div
+              key={`${w}-separator`}
               style={{
-                flex: 1,
-                textAlign: "center",
-                fontFamily: "-apple-system, system-ui",
-                fontSize: 17,
-                color: sugg,
-                letterSpacing: -0.43,
-                lineHeight: "22px",
+                width: 1,
+                height: 25,
+                background: "#ccc",
+                opacity: 0.3,
               }}
-            >
-              {w}
-            </div>
-          </React.Fragment>
-        ))}
+            />
+          ) : null,
+          <div
+            key={`${w}-word`}
+            style={{
+              flex: 1,
+              textAlign: "center",
+              fontFamily: "-apple-system, system-ui",
+              fontSize: 17,
+              color: sugg,
+              letterSpacing: -0.43,
+              lineHeight: "22px",
+            }}
+          >
+            {w}
+          </div>,
+        ])}
       </div>
 
       {/* key layout */}

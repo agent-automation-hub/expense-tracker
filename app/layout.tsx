@@ -3,6 +3,8 @@ import { Fraunces, Inter, JetBrains_Mono } from "next/font/google"
 
 import { ServiceWorkerRegistrar } from "@/components/pwa/service-worker-registrar"
 
+import { TRPCProvider } from "@/trpc/client"
+
 import "./globals.css"
 
 const fraunces = Fraunces({
@@ -58,7 +60,7 @@ export default function RootLayout({
       className={`${fraunces.variable} ${inter.variable} ${jetbrains.variable}`}
     >
       <body>
-        {children}
+        <TRPCProvider>{children}</TRPCProvider>
         <ServiceWorkerRegistrar />
       </body>
     </html>

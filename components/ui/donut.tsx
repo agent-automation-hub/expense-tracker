@@ -18,7 +18,11 @@ export function Donut({
 }) {
   const r = (size - thickness) / 2
   const C = 2 * Math.PI * r
-  let offset = 0
+  const offsets = segments.map((_, index) =>
+    segments
+      .slice(0, index)
+      .reduce((sum, segment) => sum + segment.pct * C + 2, 0),
+  )
 
   return (
     <div style={{ position: "relative", width: size, height: size }}>
@@ -38,7 +42,7 @@ export function Donut({
         />
         {segments.map((s, i) => {
           const dash = s.pct * C
-          const el = (
+          return (
             <circle
               key={i}
               cx={size / 2}
@@ -48,12 +52,10 @@ export function Donut({
               stroke={s.color}
               strokeWidth={thickness}
               strokeDasharray={`${dash} ${C - dash}`}
-              strokeDashoffset={-offset}
+              strokeDashoffset={-offsets[i]}
               strokeLinecap="butt"
             />
           )
-          offset += dash + 2
-          return el
         })}
       </svg>
       {center && (

@@ -750,7 +750,7 @@ function MobUpload() {
             Drop a file.
             <br />
             <span style={{ fontStyle: "italic", color: T.muted }}>
-              We'll do the filing.
+              We&apos;ll do the filing.
             </span>
           </span>
         }
@@ -1041,12 +1041,12 @@ function MobReview() {
           borderRadius: 2,
         }}
       >
-        {rows.map((r, i) => (
-          <React.Fragment key={i}>
-            <ReviewRow r={r} />
-            {i < rows.length - 1 && <Rule color={T.rule2} />}
-          </React.Fragment>
-        ))}
+        {rows.map((r, i) => [
+          <ReviewRow key={`${i}-row`} r={r} />,
+          i < rows.length - 1 ? (
+            <Rule key={`${i}-rule`} color={T.rule2} />
+          ) : null,
+        ])}
       </div>
 
       {/* Totals summary */}
@@ -1650,12 +1650,12 @@ function MobCategories() {
           borderRadius: 2,
         }}
       >
-        {exp.map((c, i) => (
-          <React.Fragment key={c.id}>
-            <Row c={c} />
-            {i < exp.length - 1 && <Rule color={T.rule2} />}
-          </React.Fragment>
-        ))}
+        {exp.map((c, i) => [
+          <Row key={`${c.id}-row`} c={c} />,
+          i < exp.length - 1 ? (
+            <Rule key={`${c.id}-rule`} color={T.rule2} />
+          ) : null,
+        ])}
       </div>
 
       <div style={{ padding: "0 22px 10px" }}>
@@ -1669,12 +1669,12 @@ function MobCategories() {
           borderRadius: 2,
         }}
       >
-        {earn.map((c, i) => (
-          <React.Fragment key={c.id}>
-            <Row c={c} />
-            {i < earn.length - 1 && <Rule color={T.rule2} />}
-          </React.Fragment>
-        ))}
+        {earn.map((c, i) => [
+          <Row key={`${c.id}-row`} c={c} />,
+          i < earn.length - 1 ? (
+            <Rule key={`${c.id}-rule`} color={T.rule2} />
+          ) : null,
+        ])}
       </div>
     </MobileShell>
   )

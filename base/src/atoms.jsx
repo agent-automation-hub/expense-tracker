@@ -180,7 +180,11 @@ function Donut({ segments, size = 220, thickness = 22, center }) {
   // segments: [{pct, color}]
   const r = (size - thickness) / 2
   const C = 2 * Math.PI * r
-  let offset = 0
+  const offsets = segments.map((_, index) =>
+    segments
+      .slice(0, index)
+      .reduce((sum, segment) => sum + segment.pct * C + 2, 0),
+  )
   return (
     <div style={{ position: "relative", width: size, height: size }}>
       <svg
@@ -199,7 +203,7 @@ function Donut({ segments, size = 220, thickness = 22, center }) {
         />
         {segments.map((s, i) => {
           const dash = s.pct * C
-          const el = (
+          return (
             <circle
               key={i}
               cx={size / 2}
@@ -209,12 +213,10 @@ function Donut({ segments, size = 220, thickness = 22, center }) {
               stroke={s.color}
               strokeWidth={thickness}
               strokeDasharray={`${dash} ${C - dash}`}
-              strokeDashoffset={-offset}
+              strokeDashoffset={-offsets[i]}
               strokeLinecap="butt"
             />
           )
-          offset += dash + 2 // 2px gap
-          return el
         })}
       </svg>
       {center && (
