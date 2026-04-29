@@ -1,6 +1,7 @@
 import { and, asc, eq } from "drizzle-orm"
 import { z } from "zod"
 
+import type { CategoryListItem } from "@/lib/categories/types"
 import { categories, profiles } from "@/lib/db/schema"
 
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init"
@@ -15,16 +16,18 @@ const categoryInput = z.object({
   scope: z.enum(["expense", "income", "both"]),
 })
 
+const categoryListFields = {
+  color: categories.color,
+  icon: categories.icon,
+  id: categories.id,
+  name: categories.name,
+  scope: categories.scope,
+} satisfies Record<keyof CategoryListItem, unknown>
+
 export const categoriesRouter = createTRPCRouter({
   list: protectedProcedure.query(({ ctx }) => {
     return ctx.db
-      .select({
-        color: categories.color,
-        icon: categories.icon,
-        id: categories.id,
-        name: categories.name,
-        scope: categories.scope,
-      })
+      .select(categoryListFields)
       .from(categories)
       .where(
         and(
@@ -60,11 +63,7 @@ export const categoriesRouter = createTRPCRouter({
           userId: ctx.user.id,
         })
         .returning({
-          color: categories.color,
-          icon: categories.icon,
-          id: categories.id,
-          name: categories.name,
-          scope: categories.scope,
+          ...categoryListFields,
         })
 
       return category

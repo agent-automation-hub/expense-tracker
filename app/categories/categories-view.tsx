@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react"
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import type { inferRouterOutputs } from "@trpc/server"
 
+import type { CategoryListItem } from "@/lib/categories/types"
 import { T } from "@/lib/design/tokens"
 
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,6 @@ import { IconArrowRight, IconPlus, IconX } from "@/components/ui/icons"
 import { Rule } from "@/components/ui/rule"
 
 import { trpc } from "@/trpc/client"
-import type { AppRouter } from "@/trpc/routers/_app"
 
 const PALETTE = [
   "#D66A4E",
@@ -31,9 +30,7 @@ const PALETTE = [
   "#C2785C",
 ]
 
-type Category = inferRouterOutputs<AppRouter>["categories"]["list"][number]
-
-function CategoryRow({ cat }: { cat: Category }) {
+function CategoryRow({ cat }: { cat: CategoryListItem }) {
   return (
     <div
       style={{
@@ -161,7 +158,7 @@ function CategoryList({
   categories,
   emptyLabel,
 }: {
-  categories: Category[]
+  categories: CategoryListItem[]
   emptyLabel: string
 }) {
   if (!categories.length) {
