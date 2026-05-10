@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 
+import { useQuery } from "@tanstack/react-query"
+
 import { T } from "@/lib/design/tokens"
-import { totals, tx } from "@/lib/mock/data"
 import { fmtCOPraw } from "@/lib/utils/format"
 
 import { Button } from "@/components/ui/button"
@@ -11,6 +12,8 @@ import { Chip } from "@/components/ui/chip"
 import { Eyebrow } from "@/components/ui/eyebrow"
 import { IconDownload } from "@/components/ui/icons"
 import { MonoNumber } from "@/components/ui/mono-number"
+
+import { trpc } from "@/trpc/client"
 
 const formats = [
   { id: "pdf", fmt: "PDF", sub: "Statement" },
@@ -20,7 +23,6 @@ const formats = [
 
 const dateRanges = ["This month", "Last month", "This year", "Custom"]
 const includeOptions = ["All transactions", "Expenses", "Earnings"]
-const categoryOptions = ["All 9", "Select\u2026"]
 
 function SummaryCell({
   label,
@@ -56,9 +58,26 @@ export function ExportView() {
   const [selectedFormat, setSelectedFormat] = useState("pdf")
   const [selectedRange, setSelectedRange] = useState("This month")
   const [selectedInclude, setSelectedInclude] = useState("All transactions")
-  const [selectedCategory, setSelectedCategory] = useState("All 9")
+  const [selectedCategory, setSelectedCategory] = useState("All")
+
+  const { data: stats } = useQuery(trpc.dashboard.stats.queryOptions())
+  const { data: transactions = [] } = useQuery(
+    trpc.transactions.list.queryOptions({ limit: 200 }),
+  )
+  const { data: allCategories = [] } = useQuery(
+    trpc.categories.list.queryOptions(),
+  )
+
+  const spent = stats?.spent ?? 0
+  const earned = stats?.earned ?? 0
+  const categoryOptions = [`All ${allCategories.length}`, "Select…"]
 
   const current = formats.find((f) => f.id === selectedFormat)!
+
+  const now = new Date()
+  const monthLabel = now
+    .toLocaleDateString("en-US", { month: "long", year: "numeric" })
+    .toUpperCase()
 
   return (
     <div style={{ flex: 1, overflow: "auto", paddingBottom: 28 }}>
@@ -180,7 +199,7 @@ export function ExportView() {
         >
           <Eyebrow>Preview</Eyebrow>
           <MonoNumber size={10} color={T.muted}>
-            APRIL 2026
+            {monthLabel}
           </MonoNumber>
         </div>
         <div
@@ -190,16 +209,16 @@ export function ExportView() {
             gap: 10,
           }}
         >
-          <SummaryCell label="Transactions" val={tx.length} />
+          <SummaryCell label="Transactions" val={transactions.length} />
           <SummaryCell label="File size" val="~ 42 KB" />
           <SummaryCell
             label="Out"
-            val={`COP$ ${fmtCOPraw(totals.spent)}`}
+            val={`COP$ ${fmtCOPraw(spent)}`}
             color={T.coral}
           />
           <SummaryCell
             label="In"
-            val={`COP$ ${fmtCOPraw(totals.earned)}`}
+            val={`COP$ ${fmtCOPraw(earned)}`}
             color={T.teal}
           />
         </div>

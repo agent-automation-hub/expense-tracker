@@ -2,8 +2,9 @@
 
 import Link from "next/link"
 
-import { T, catColors } from "@/lib/design/tokens"
-import { breakdown, totals } from "@/lib/mock/data"
+import { useQuery } from "@tanstack/react-query"
+
+import { T } from "@/lib/design/tokens"
 import { fmtCOPraw } from "@/lib/utils/format"
 
 import { Button } from "@/components/ui/button"
@@ -14,10 +15,18 @@ import { Eyebrow } from "@/components/ui/eyebrow"
 import { IconSparkle, IconUpload } from "@/components/ui/icons"
 import { MonoNumber } from "@/components/ui/mono-number"
 
+import { trpc } from "@/trpc/client"
+
 export function CategoryBreakdown() {
+  const { data: breakdown = [] } = useQuery(
+    trpc.dashboard.breakdown.queryOptions(),
+  )
+  const { data: stats } = useQuery(trpc.dashboard.stats.queryOptions())
+  const totalSpent = stats?.spent ?? 0
+
   const segments = breakdown.map((r) => ({
     pct: r.pct,
-    color: catColors[r.id] || T.faint,
+    color: r.color || T.faint,
   }))
 
   return (
@@ -64,7 +73,9 @@ export function CategoryBreakdown() {
                 Total
               </div>
               <DisplayNumber size={22} style={{ marginTop: 2 }}>
-                {fmtCOPraw(totals.spent / 1000).replace(/\.\d+$/, "")}k
+                {totalSpent > 0
+                  ? fmtCOPraw(totalSpent / 1000).replace(/\.\d+$/, "") + "k"
+                  : "0"}
               </DisplayNumber>
             </div>
           }
@@ -79,15 +90,15 @@ export function CategoryBreakdown() {
         >
           {breakdown.slice(0, 5).map((r) => (
             <div
-              key={r.id}
+              key={r.id ?? "uncategorized"}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
               }}
             >
-              <Dot color={catColors[r.id] || T.faint} size={8} />
-              <div style={{ flex: 1, fontSize: 13 }}>{r.label}</div>
+              <Dot color={r.color || T.faint} size={8} />
+              <div style={{ flex: 1, fontSize: 13 }}>{r.name}</div>
               <MonoNumber size={12} color={T.muted}>
                 {Math.round(r.pct * 100)}%
               </MonoNumber>

@@ -2,15 +2,19 @@
 
 import { useMemo, useRef, useState } from "react"
 
+import { useQuery } from "@tanstack/react-query"
 import Fuse from "fuse.js"
 
 import { T } from "@/lib/design/tokens"
-import { type Transaction, tx } from "@/lib/mock/data"
+import type { TransactionListItem } from "@/lib/transactions/types"
+import { parseISODate } from "@/lib/utils/format"
 
 import { TxRow } from "@/components/transactions/tx-row"
 import { Calendar } from "@/components/ui/calendar"
 import { Eyebrow } from "@/components/ui/eyebrow"
 import { IconFilter, IconSearch } from "@/components/ui/icons"
+
+import { trpc } from "@/trpc/client"
 
 type TypeFilter = "all" | "out" | "in"
 
@@ -21,7 +25,7 @@ const TYPE_FILTERS: { id: TypeFilter; label: string }[] = [
 ]
 
 const fuseOptions = {
-  keys: ["title", "note", "cat"],
+  keys: ["merchant", "note", "category.name"],
   threshold: 0.2,
   distance: 1000,
   minMatchCharLength: 2,
@@ -32,41 +36,62 @@ const fuseOptions = {
   minMatchCharLength: number
 }
 
-const MONTH_ABBR: Record<string, number> = {
-  Jan: 0,
-  Feb: 1,
-  Mar: 2,
-  Apr: 3,
-  May: 4,
-  Jun: 5,
-  Jul: 6,
-  Aug: 7,
-  Sep: 8,
-  Oct: 9,
-  Nov: 10,
-  Dec: 11,
-}
-
-function parseTxDate(dateStr: string): Date {
-  if (dateStr.startsWith("Today")) return new Date(2026, 3, 17)
-  if (dateStr.startsWith("Yesterday")) return new Date(2026, 3, 16)
-  const match = dateStr.match(/^(\w{3})\s+(\d{1,2})/)
-  if (match) return new Date(2026, MONTH_ABBR[match[1]], parseInt(match[2]))
-  return new Date(2026, 3, 17)
-}
-
-function buildGroups(items: Transaction[]) {
-  const today = items.filter((t) => t.date.startsWith("Today"))
-  const yesterday = items.filter((t) => t.date.startsWith("Yesterday"))
-  const rest = items.filter(
-    (t) => !t.date.startsWith("Today") && !t.date.startsWith("Yesterday"),
+function isSameDay(a: Date, b: Date) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
   )
-  const thisWeek = rest.slice(0, 4)
-  const earlier = rest.slice(4)
+}
+
+function buildGroups(items: TransactionListItem[]) {
+  const now = new Date()
+  const yesterday = new Date(now)
+  yesterday.setDate(now.getDate() - 1)
+
+  const startOfWeek = new Date(now)
+  startOfWeek.setDate(now.getDate() - now.getDay())
+  startOfWeek.setHours(0, 0, 0, 0)
+
+  const today: TransactionListItem[] = []
+  const yesterdayItems: TransactionListItem[] = []
+  const thisWeek: TransactionListItem[] = []
+  const earlier: TransactionListItem[] = []
+
+  for (const t of items) {
+    const d = parseISODate(t.date)
+    if (isSameDay(d, now)) {
+      today.push(t)
+    } else if (isSameDay(d, yesterday)) {
+      yesterdayItems.push(t)
+    } else if (d >= startOfWeek) {
+      thisWeek.push(t)
+    } else {
+      earlier.push(t)
+    }
+  }
+
+  const fmt = (d: Date) => {
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ]
+    return `${months[d.getMonth()]} ${d.getDate()}`
+  }
 
   return [
-    { label: "Today, Apr 17", items: today },
-    { label: "Yesterday, Apr 16", items: yesterday },
+    { label: `Today, ${fmt(now)}`, items: today },
+    { label: `Yesterday, ${fmt(yesterday)}`, items: yesterdayItems },
     { label: "This week", items: thisWeek },
     { label: "Earlier", items: earlier },
   ]
@@ -81,8 +106,12 @@ export function ActivityView() {
   const [dateEnd, setDateEnd] = useState<Date | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  const { data: allTx = [] } = useQuery(
+    trpc.transactions.list.queryOptions({ limit: 200 }),
+  )
+
   const typeFiltered =
-    typeFilter === "all" ? tx : tx.filter((t) => t.type === typeFilter)
+    typeFilter === "all" ? allTx : allTx.filter((t) => t.type === typeFilter)
 
   const fuse = useMemo(
     () => new Fuse(typeFiltered, fuseOptions),
@@ -98,12 +127,12 @@ export function ActivityView() {
     if (dateEnd) {
       const endMs = dateEnd.getTime()
       filtered = filtered.filter((t) => {
-        const ms = parseTxDate(t.date).getTime()
+        const ms = parseISODate(t.date).getTime()
         return ms >= startMs && ms <= endMs
       })
     } else {
       filtered = filtered.filter(
-        (t) => parseTxDate(t.date).getTime() === startMs,
+        (t) => parseISODate(t.date).getTime() === startMs,
       )
     }
   }

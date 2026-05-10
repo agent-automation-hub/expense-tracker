@@ -1,7 +1,8 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
+
 import { T } from "@/lib/design/tokens"
-import { spark, totals } from "@/lib/mock/data"
 import { fmtCOPraw } from "@/lib/utils/format"
 
 import { Chip } from "@/components/ui/chip"
@@ -10,7 +11,36 @@ import { Eyebrow } from "@/components/ui/eyebrow"
 import { MonoNumber } from "@/components/ui/mono-number"
 import { Sparkline } from "@/components/ui/sparkline"
 
+import { trpc } from "@/trpc/client"
+
+const MONTHS_SHORT = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+]
+
 export function HeroStats() {
+  const { data } = useQuery(trpc.dashboard.stats.queryOptions())
+  const earned = data?.earned ?? 0
+  const spent = data?.spent ?? 0
+  const balance = data?.balance ?? 0
+  const spark = data?.spark ?? []
+  const month = data?.month ?? new Date().getMonth() + 1
+  const year = data?.year ?? new Date().getFullYear()
+
+  const daysInMonth = new Date(year, month, 0).getDate()
+  const startLabel = `${MONTHS_SHORT[month - 1]} 01`
+  const endLabel = `${MONTHS_SHORT[month - 1]} ${daysInMonth}`
+
   return (
     <section
       style={{
@@ -23,7 +53,7 @@ export function HeroStats() {
         marginBottom: 16,
       }}
     >
-      <StatCard label="Earned \u00B7 in" color={T.teal} amount={totals.earned}>
+      <StatCard label="Earned · in" color={T.teal} amount={earned}>
         <div
           style={{
             display: "flex",
@@ -35,15 +65,14 @@ export function HeroStats() {
           }}
         >
           <Chip tone="teal" size="sm">
-            + 12.4%
+            this month
           </Chip>
-          <span>vs March</span>
         </div>
       </StatCard>
 
       <div style={{ background: T.rule }} />
 
-      <StatCard label="Spent \u00B7 out" color={T.coral} amount={totals.spent}>
+      <StatCard label="Spent · out" color={T.coral} amount={spent}>
         <div
           style={{
             display: "flex",
@@ -55,9 +84,8 @@ export function HeroStats() {
           }}
         >
           <Chip tone="coral" size="sm">
-            &minus; 3.1%
+            this month
           </Chip>
-          <span>vs March</span>
         </div>
       </StatCard>
 
@@ -77,7 +105,7 @@ export function HeroStats() {
             <span style={{ fontSize: 24, fontWeight: 400, marginRight: 6 }}>
               COP$
             </span>
-            {fmtCOPraw(totals.balance)}
+            {fmtCOPraw(balance)}
           </DisplayNumber>
         </div>
         <div style={{ marginTop: 8 }}>
@@ -96,10 +124,10 @@ export function HeroStats() {
             }}
           >
             <MonoNumber size={10} color={T.muted}>
-              Apr 01
+              {startLabel}
             </MonoNumber>
             <MonoNumber size={10} color={T.muted}>
-              Apr 30
+              {endLabel}
             </MonoNumber>
           </div>
         </div>

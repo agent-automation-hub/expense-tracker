@@ -13,7 +13,8 @@ export function Sparkline({
   color?: string
   soft?: string
 }) {
-  const max = Math.max(...data)
+  if (data.length === 0) return <svg width={width} height={height} />
+  const max = Math.max(...data) || 1
   const bw = width / data.length
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>

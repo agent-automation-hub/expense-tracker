@@ -1,29 +1,88 @@
 "use client"
 
-import { Suspense } from "react"
+import { Suspense, useRef, useState } from "react"
 
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { T } from "@/lib/design/tokens"
 
 import { Button } from "@/components/ui/button"
-import { Chip } from "@/components/ui/chip"
 import { DisplayNumber } from "@/components/ui/display-number"
+import { Dot } from "@/components/ui/dot"
 import { Eyebrow } from "@/components/ui/eyebrow"
-import { Field } from "@/components/ui/field"
-import {
-  IconArrowRight,
-  IconMinus,
-  IconPlus,
-  IconX,
-} from "@/components/ui/icons"
+import { IconMinus, IconPlus, IconX } from "@/components/ui/icons"
 import { Rule } from "@/components/ui/rule"
+
+import { trpc } from "@/trpc/client"
+
+function sanitizeAmount(raw: string) {
+  return raw.replace(/[^\d]/g, "")
+}
+
+function formatAmountDisplay(digits: string) {
+  if (!digits) return "0"
+  const n = Number(digits)
+  if (isNaN(n)) return "0"
+  return n.toLocaleString("es-CO").replace(/,/g, ".")
+}
 
 function AddTransactionContent() {
   const params = useSearchParams()
-  const type = params.get("type") === "earning" ? "earning" : "expense"
+  const router = useRouter()
+  const queryClient = useQueryClient()
+
+  const [type, setType] = useState<"expense" | "income">(
+    params.get("type") === "earning" ? "income" : "expense",
+  )
   const isExpense = type === "expense"
+
+  const [amount, setAmount] = useState("")
+  const amountRef = useRef<HTMLInputElement>(null)
+  const [merchant, setMerchant] = useState("")
+  const [note, setNote] = useState("")
+  const [date, setDate] = useState(() => {
+    const d = new Date()
+    return d.toISOString().split("T")[0]
+  })
+  const [categoryId, setCategoryId] = useState<string | undefined>()
+  const [catOpen, setCatOpen] = useState(false)
+
+  const { data: categories = [] } = useQuery(
+    trpc.categories.list.queryOptions(),
+  )
+
+  const filteredCategories = categories.filter(
+    (c) => c.scope === (isExpense ? "expense" : "income") || c.scope === "both",
+  )
+
+  const selectedCategory = categories.find((c) => c.id === categoryId)
+
+  const createTx = useMutation(
+    trpc.transactions.create.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries(trpc.transactions.list.queryFilter())
+        queryClient.invalidateQueries(trpc.dashboard.stats.queryFilter())
+        queryClient.invalidateQueries(trpc.dashboard.breakdown.queryFilter())
+        router.push("/")
+      },
+    }),
+  )
+
+  function handleSave() {
+    if (!amount || Number(amount) <= 0) return
+    createTx.mutate({
+      type,
+      amount,
+      currency: "COP",
+      date,
+      merchant: merchant || undefined,
+      note: note || undefined,
+      categoryId: categoryId || undefined,
+    })
+  }
 
   return (
     <div
@@ -73,9 +132,22 @@ function AddTransactionContent() {
             <IconX size={11} />
           </Link>
           <div style={{ fontSize: 13, color: T.muted }}>New transaction</div>
-          <div style={{ fontSize: 13, fontWeight: 500, color: T.muted }}>
-            Save
-          </div>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={createTx.isPending || !amount}
+            style={{
+              fontSize: 13,
+              fontWeight: 500,
+              color: amount ? T.ink : T.muted,
+              cursor: amount ? "pointer" : "default",
+              background: "none",
+              border: "none",
+              fontFamily: "inherit",
+            }}
+          >
+            {createTx.isPending ? "Saving..." : "Save"}
+          </button>
         </div>
 
         <div
@@ -89,7 +161,12 @@ function AddTransactionContent() {
             marginBottom: 28,
           }}
         >
-          <div
+          <button
+            type="button"
+            onClick={() => {
+              setType("expense")
+              setCategoryId(undefined)
+            }}
             style={{
               background: isExpense ? T.coral : "transparent",
               color: isExpense ? "#fff" : T.muted,
@@ -101,14 +178,21 @@ function AddTransactionContent() {
               fontSize: 13.5,
               fontWeight: 500,
               cursor: "pointer",
+              border: "none",
+              fontFamily: "inherit",
             }}
           >
             <span style={{ display: "inline-flex" }}>
               <IconMinus size={12} />
             </span>
             Expense
-          </div>
-          <div
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setType("income")
+              setCategoryId(undefined)
+            }}
             style={{
               background: !isExpense ? T.teal : "transparent",
               color: !isExpense ? "#fff" : T.muted,
@@ -120,16 +204,26 @@ function AddTransactionContent() {
               fontSize: 13.5,
               fontWeight: 500,
               cursor: "pointer",
+              border: "none",
+              fontFamily: "inherit",
             }}
           >
             <span style={{ display: "inline-flex" }}>
               <IconPlus size={12} />
             </span>
             Earning
-          </div>
+          </button>
         </div>
 
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: 32,
+            cursor: "text",
+            position: "relative",
+          }}
+          onClick={() => amountRef.current?.focus()}
+        >
           <Eyebrow>Amount</Eyebrow>
           <div
             style={{
@@ -154,7 +248,7 @@ function AddTransactionContent() {
               color={isExpense ? T.coral : T.teal}
               weight={300}
             >
-              18.500
+              {formatAmountDisplay(amount)}
             </DisplayNumber>
             <span
               style={{
@@ -167,6 +261,23 @@ function AddTransactionContent() {
               }}
             />
           </div>
+          <input
+            ref={amountRef}
+            type="text"
+            inputMode="numeric"
+            value={amount}
+            onChange={(e) => setAmount(sanitizeAmount(e.target.value))}
+            autoFocus
+            style={{
+              position: "absolute",
+              opacity: 0,
+              width: 1,
+              height: 1,
+              top: 0,
+              left: 0,
+              pointerEvents: "none",
+            }}
+          />
         </div>
 
         <div
@@ -178,11 +289,69 @@ function AddTransactionContent() {
             marginBottom: 20,
           }}
         >
-          <Field label="Merchant" value="Azahar Coffee" />
+          <div
+            style={{
+              padding: "14px 16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 12,
+                color: T.muted,
+                letterSpacing: 0.3,
+                textTransform: "uppercase",
+                fontWeight: 500,
+                width: 90,
+              }}
+            >
+              Merchant
+            </div>
+            <input
+              type="text"
+              value={merchant}
+              onChange={(e) => setMerchant(e.target.value)}
+              placeholder="Where did you spend?"
+              style={{
+                flex: 1,
+                textAlign: "right",
+                fontSize: 14,
+                color: T.ink,
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                fontFamily: T.sans,
+              }}
+            />
+          </div>
           <Rule color={T.rule2} />
-          <Field
-            label="Category"
-            rightNode={
+          <div style={{ position: "relative" }}>
+            <div
+              onClick={() => setCatOpen(!catOpen)}
+              style={{
+                padding: "14px 16px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 12,
+                cursor: "pointer",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 12,
+                  color: T.muted,
+                  letterSpacing: 0.3,
+                  textTransform: "uppercase",
+                  fontWeight: 500,
+                  width: 90,
+                }}
+              >
+                Category
+              </div>
               <div
                 style={{
                   display: "flex",
@@ -190,35 +359,220 @@ function AddTransactionContent() {
                   gap: 8,
                 }}
               >
-                <Chip tone="coral" size="sm">
-                  Food & drink
-                </Chip>
-                <span style={{ color: T.muted }}>
-                  <IconArrowRight size={12} />
+                {selectedCategory ? (
+                  <>
+                    <Dot color={selectedCategory.color || T.faint} size={8} />
+                    <span style={{ fontSize: 14, color: T.ink }}>
+                      {selectedCategory.name}
+                    </span>
+                  </>
+                ) : (
+                  <span style={{ fontSize: 14, color: T.muted }}>
+                    Choose...
+                  </span>
+                )}
+                <span
+                  style={{
+                    color: T.muted,
+                    display: "inline-flex",
+                    transform: catOpen ? "rotate(90deg)" : "none",
+                    transition: "transform 120ms ease",
+                  }}
+                >
+                  ›
                 </span>
               </div>
-            }
-          />
+            </div>
+            {catOpen && (
+              <>
+                <div
+                  style={{ position: "fixed", inset: 0, zIndex: 19 }}
+                  onClick={() => setCatOpen(false)}
+                />
+                <div
+                  style={{
+                    background: T.paper,
+                    border: `1px solid ${T.rule}`,
+                    borderRadius: 10,
+                    position: "absolute",
+                    left: -1,
+                    right: -1,
+                    top: "100%",
+                    zIndex: 20,
+                    boxShadow: "0 6px 24px rgba(0,0,0,.08)",
+                    maxHeight: 240,
+                    overflowY: "auto",
+                  }}
+                >
+                  {filteredCategories.length === 0 ? (
+                    <div
+                      style={{
+                        padding: "18px 16px",
+                        fontSize: 13,
+                        color: T.muted,
+                        textAlign: "center",
+                      }}
+                    >
+                      No categories yet
+                    </div>
+                  ) : (
+                    filteredCategories.map((c, i) => {
+                      const selected = categoryId === c.id
+                      return (
+                        <div key={c.id}>
+                          {i > 0 && (
+                            <div
+                              style={{
+                                height: 1,
+                                background: T.rule2,
+                                margin: "0 16px",
+                              }}
+                            />
+                          )}
+                          <div
+                            onClick={() => {
+                              setCategoryId(selected ? undefined : c.id)
+                              setCatOpen(false)
+                            }}
+                            style={{
+                              padding: "11px 16px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                              cursor: "pointer",
+                              background: selected ? T.ivory : "transparent",
+                              transition: "background 80ms ease",
+                            }}
+                          >
+                            <Dot color={c.color || T.faint} size={10} />
+                            <span
+                              style={{
+                                flex: 1,
+                                fontSize: 14,
+                                fontWeight: selected ? 600 : 400,
+                                color: T.ink,
+                              }}
+                            >
+                              {c.name}
+                            </span>
+                            {selected && (
+                              <span
+                                style={{
+                                  fontSize: 14,
+                                  color: isExpense ? T.coral : T.teal,
+                                }}
+                              >
+                                ✓
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })
+                  )}
+                  <div
+                    style={{
+                      height: 1,
+                      background: T.rule,
+                      margin: "0 16px",
+                    }}
+                  />
+                  <Link
+                    href="/categories"
+                    onClick={() => setCatOpen(false)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "11px 16px",
+                      fontSize: 13,
+                      color: T.muted,
+                      textDecoration: "none",
+                      fontWeight: 500,
+                    }}
+                  >
+                    <span style={{ fontSize: 16, lineHeight: 1 }}>+</span>
+                    New category
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
           <Rule color={T.rule2} />
-          <Field label="Date" value="Today, 09:12" />
+          <div
+            style={{
+              padding: "14px 16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 12,
+                color: T.muted,
+                letterSpacing: 0.3,
+                textTransform: "uppercase",
+                fontWeight: 500,
+                width: 90,
+              }}
+            >
+              Date
+            </div>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              style={{
+                fontSize: 14,
+                color: T.ink,
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                fontFamily: T.sans,
+              }}
+            />
+          </div>
           <Rule color={T.rule2} />
-          <Field label="Note" value="Oat latte &middot; Chapinero" muted />
-        </div>
-
-        <Eyebrow style={{ marginBottom: 10 }}>Suggested</Eyebrow>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-          {[
-            "Food & drink",
-            "Transport",
-            "Groceries",
-            "Coffee",
-            "Leisure",
-            "+ New",
-          ].map((l, i) => (
-            <Chip key={l} tone={i === 0 ? "ink" : "ghost"} size="md">
-              {l}
-            </Chip>
-          ))}
+          <div
+            style={{
+              padding: "14px 16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 12,
+                color: T.muted,
+                letterSpacing: 0.3,
+                textTransform: "uppercase",
+                fontWeight: 500,
+                width: 90,
+              }}
+            >
+              Note
+            </div>
+            <input
+              type="text"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Optional note"
+              style={{
+                flex: 1,
+                textAlign: "right",
+                fontSize: 14,
+                color: T.muted,
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                fontFamily: T.sans,
+              }}
+            />
+          </div>
         </div>
 
         <div
@@ -233,8 +587,12 @@ function AddTransactionContent() {
             variant={isExpense ? "coral" : "teal"}
             size="lg"
             style={{ width: "100%", justifyContent: "center", fontSize: 15 }}
+            onClick={handleSave}
+            disabled={createTx.isPending || !amount}
           >
-            Save {isExpense ? "expense" : "earning"}
+            {createTx.isPending
+              ? "Saving..."
+              : `Save ${isExpense ? "expense" : "earning"}`}
           </Button>
         </div>
       </div>
