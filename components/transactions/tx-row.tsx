@@ -1,9 +1,8 @@
 "use client"
 
 import { T } from "@/lib/design/tokens"
-import { catMap } from "@/lib/mock/data"
-import type { Transaction } from "@/lib/mock/data"
-import { fmtCOPraw } from "@/lib/utils/format"
+import type { TransactionListItem } from "@/lib/transactions/types"
+import { fmtCOPraw, formatTxDate } from "@/lib/utils/format"
 
 import { Chip } from "@/components/ui/chip"
 import { IconDots, IconSparkle } from "@/components/ui/icons"
@@ -15,10 +14,9 @@ export function TxRow({
   transaction,
   first = false,
 }: {
-  transaction: Transaction
+  transaction: TransactionListItem
   first?: boolean
 }) {
-  const cat = catMap[transaction.cat]
   const isOut = transaction.type === "out"
   return (
     <>
@@ -45,7 +43,7 @@ export function TxRow({
               alignItems: "center",
             }}
           >
-            {transaction.title}
+            {transaction.merchant ?? "Unknown"}
             {transaction.src === "ai" && (
               <span
                 title="From AI extraction"
@@ -60,10 +58,10 @@ export function TxRow({
           </div>
         </div>
         <Chip tone="ghost" size="sm" style={{ justifySelf: "start" }}>
-          {cat.label}
+          {transaction.category?.name ?? "Uncategorized"}
         </Chip>
         <MonoNumber size={11} color={T.muted}>
-          {transaction.date}
+          {formatTxDate(transaction.date, transaction.createdAt)}
         </MonoNumber>
         <MonoNumber
           size={14}

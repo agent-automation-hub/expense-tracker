@@ -2,15 +2,22 @@
 
 import Link from "next/link"
 
+import { useQuery } from "@tanstack/react-query"
+
 import { T } from "@/lib/design/tokens"
-import { tx } from "@/lib/mock/data"
 
 import { TxRow } from "@/components/transactions/tx-row"
 import { Chip } from "@/components/ui/chip"
 import { Eyebrow } from "@/components/ui/eyebrow"
 import { IconArrowRight } from "@/components/ui/icons"
 
+import { trpc } from "@/trpc/client"
+
 export function RecentActivity() {
+  const { data: transactions = [] } = useQuery(
+    trpc.transactions.list.queryOptions({ limit: 7 }),
+  )
+
   return (
     <div
       style={{
@@ -58,7 +65,7 @@ export function RecentActivity() {
       </header>
 
       <div style={{ overflow: "hidden" }}>
-        {tx.slice(0, 7).map((t, i) => (
+        {transactions.map((t, i) => (
           <TxRow key={t.id} transaction={t} first={i === 0} />
         ))}
       </div>
@@ -75,7 +82,7 @@ export function RecentActivity() {
           marginTop: 8,
         }}
       >
-        <span>Showing 7 of 42 this month</span>
+        <span>Showing {transactions.length} recent</span>
         <Link
           href="/activity"
           style={{

@@ -1,9 +1,8 @@
 "use client"
 
 import { T } from "@/lib/design/tokens"
-import { catMap } from "@/lib/mock/data"
-import type { Transaction } from "@/lib/mock/data"
-import { fmtCOPraw } from "@/lib/utils/format"
+import type { TransactionListItem } from "@/lib/transactions/types"
+import { fmtCOPraw, formatTxDate } from "@/lib/utils/format"
 
 import { MonoNumber } from "@/components/ui/mono-number"
 import { TypeGlyph } from "@/components/ui/type-glyph"
@@ -12,10 +11,9 @@ export function MobileTxRow({
   transaction,
   last = false,
 }: {
-  transaction: Transaction
+  transaction: TransactionListItem
   last?: boolean
 }) {
-  const cat = catMap[transaction.cat]
   const isOut = transaction.type === "out"
   return (
     <div
@@ -30,10 +28,11 @@ export function MobileTxRow({
       <TypeGlyph type={transaction.type} size={30} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 14, fontWeight: 500, color: T.ink }}>
-          {transaction.title}
+          {transaction.merchant ?? "Unknown"}
         </div>
         <div style={{ fontSize: 11.5, color: T.muted, marginTop: 2 }}>
-          {cat.label} &middot; {transaction.date.replace(/·.*/, "").trim()}
+          {transaction.category?.name ?? "Uncategorized"} &middot;{" "}
+          {formatTxDate(transaction.date)}
         </div>
       </div>
       <MonoNumber
@@ -41,7 +40,7 @@ export function MobileTxRow({
         color={isOut ? T.coral : T.teal}
         style={{ fontWeight: 600 }}
       >
-        {isOut ? "\u2212" : "+"} {fmtCOPraw(transaction.amount)}
+        {isOut ? "−" : "+"} {fmtCOPraw(transaction.amount)}
       </MonoNumber>
     </div>
   )

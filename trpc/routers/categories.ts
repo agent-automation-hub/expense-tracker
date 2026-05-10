@@ -1,4 +1,5 @@
-import { and, asc, eq } from "drizzle-orm"
+import { TRPCError } from "@trpc/server"
+import { and, asc, eq, sql } from "drizzle-orm"
 import { z } from "zod"
 
 import type { CategoryListItem } from "@/lib/categories/types"
@@ -67,5 +68,58 @@ export const categoriesRouter = createTRPCRouter({
         })
 
       return category
+    }),
+
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().uuid(),
+        name: z.string().trim().min(1).max(80).optional(),
+        scope: z.enum(["expense", "income", "both"]).optional(),
+        color: z
+          .string()
+          .regex(/^#[0-9A-Fa-f]{6}$/)
+          .nullish(),
+        icon: z.string().trim().max(40).nullish(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, ...fields } = input
+      const updates: Record<string, unknown> = {}
+      if (fields.name !== undefined) updates.name = fields.name
+      if (fields.scope !== undefined) updates.scope = fields.scope
+      if (fields.color !== undefined) updates.color = fields.color
+      if (fields.icon !== undefined) updates.icon = fields.icon
+      updates.updatedAt = sql`now()`
+
+      const [row] = await ctx.db
+        .update(categories)
+        .set(updates)
+        .where(and(eq(categories.id, id), eq(categories.userId, ctx.user.id)))
+        .returning(categoryListFields)
+
+      if (!row) {
+        throw new TRPCError({ code: "NOT_FOUND" })
+      }
+
+      return row
+    }),
+
+  archive: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const [row] = await ctx.db
+        .update(categories)
+        .set({ isArchived: true, updatedAt: sql`now()` })
+        .where(
+          and(eq(categories.id, input.id), eq(categories.userId, ctx.user.id)),
+        )
+        .returning({ id: categories.id })
+
+      if (!row) {
+        throw new TRPCError({ code: "NOT_FOUND" })
+      }
+
+      return { id: row.id }
     }),
 })

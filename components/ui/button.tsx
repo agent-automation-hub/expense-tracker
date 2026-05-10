@@ -21,6 +21,7 @@ export function Button({
   icon,
   style,
   onClick,
+  disabled,
 }: {
   children: React.ReactNode
   variant?: keyof typeof variantMap
@@ -28,12 +29,14 @@ export function Button({
   icon?: React.ReactNode
   style?: React.CSSProperties
   onClick?: () => void
+  disabled?: boolean
 }) {
   const v = variantMap[variant]
   const s = sizeMap[size]
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       style={{
         height: s.h,
         padding: `0 ${s.px}px`,
